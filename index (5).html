@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Ismo · cours, TD corrigés, sciences et portfolio : tous mes sites réunis au même endroit.">
+<meta name="theme-color" content="#0a0a18">
+<title>Ismo · Mon univers</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>∑</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&display=swap">
+<style>
+/* ── Thème : change les couleurs du site ici ── */
+:root{--bg:#0a0a18;--fg:#eef0ff;--mute:#9aa0c8;--card:rgba(255,255,255,.05);--line:rgba(255,255,255,.16);--a:#7c5cff;--b:#00d4ff;--p:#ff5ca8;color-scheme:dark}
+@media(prefers-color-scheme:light){:root{--bg:#f3f4ff;--fg:#14142b;--mute:#585e8a;--card:rgba(255,255,255,.75);--line:rgba(20,20,60,.12);color-scheme:light}}
+*{box-sizing:border-box;margin:0}
+[hidden]{display:none!important}
+html{scroll-behavior:smooth;scroll-padding-top:70px}
+body{font-family:Outfit,system-ui,sans-serif;background:var(--bg);color:var(--fg);overflow-x:hidden}
+:focus-visible{outline:2px solid var(--b);outline-offset:3px}
+
+/* ── Curseur personnalisé (souris uniquement) ── */
+.fx,.fx *{cursor:none!important}.fx input{cursor:text!important}
+.dot,.ring{position:fixed;left:0;top:0;z-index:99;pointer-events:none;border-radius:50%;display:none}
+.fx .dot,.fx .ring{display:grid}
+.dot{width:8px;height:8px;background:var(--b)}
+.ring{width:38px;height:38px;border:1.5px solid var(--a);place-items:center;font-size:1.3rem;transition:width .25s,height .25s,background .25s}
+.ring.big{width:78px;height:78px;background:color-mix(in srgb,var(--a) 18%,transparent)}
+.ring::after{content:attr(data-t)}
+
+/* ── Décors : barre de scroll, canvas, halo ── */
+#bar{position:fixed;inset:0 0 auto;height:3px;z-index:60;transform:scaleX(0);transform-origin:0 50%;background:linear-gradient(90deg,var(--a),var(--b),var(--p))}
+#bg,.spot{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:0}
+.spot{background:radial-gradient(520px circle at var(--mx,50%) var(--my,30%),color-mix(in srgb,var(--a) 22%,transparent),transparent 70%)}
+.hero,main,footer{position:relative;z-index:1}
+
+/* ── Menu ── */
+nav{position:sticky;top:0;z-index:50;display:flex;align-items:center;gap:1rem;padding:.7rem 1.2rem;background:color-mix(in srgb,var(--bg) 70%,transparent);backdrop-filter:blur(16px);border-bottom:1px solid var(--line)}
+.logo{display:inline-block;font-weight:800;font-size:1.25rem;text-decoration:none;color:inherit;white-space:nowrap}
+.chips{display:flex;gap:.4rem;margin-left:auto;overflow-x:auto;scrollbar-width:none;padding:6px;margin-block:-6px}
+[data-magnet]{transition:transform .2s ease-out,background .3s,color .3s}
+.chip{padding:.45rem .95rem;border-radius:99px;color:var(--mute);font-weight:600;text-decoration:none;white-space:nowrap}
+.chip:hover,.chip.on{color:var(--fg);background:color-mix(in srgb,var(--c) 28%,transparent)}
+
+/* ── Hero ── */
+.hero{min-height:calc(100svh - 58px);display:grid;place-content:center;text-align:center;padding:2rem 1rem}
+.hero-in{position:relative}
+.orb{position:absolute;border-radius:50%;filter:blur(80px);opacity:.4;pointer-events:none;translate:calc(var(--nx,0)*var(--k)*1px) calc(var(--ny,0)*var(--k)*1px)}
+.eyebrow{letter-spacing:.3em;text-transform:uppercase;color:var(--mute);font-size:.8rem}
+h1{font-size:clamp(5rem,24vw,13rem);font-weight:800;line-height:1;animation:hue 10s linear infinite}
+h1 span{display:inline-block;background:linear-gradient(90deg,var(--a),var(--b),var(--p),var(--a));background-size:400% 100%;background-position:calc(var(--i)*18%) 0;-webkit-background-clip:text;background-clip:text;color:transparent;animation:drop .9s cubic-bezier(.2,.9,.3,1.3) both;animation-delay:calc(var(--i)*90ms + .2s);transition:transform .35s cubic-bezier(.3,1.8,.5,1)}
+h1 span:hover{transform:translateY(-.12em) rotate(-6deg) scale(1.12)}
+.type{margin-top:.4rem;min-height:1.6em;font-size:clamp(1rem,3vw,1.5rem);color:var(--mute)}
+.type b{color:var(--fg);font-weight:600}
+.type::after{content:"|";margin-left:2px;animation:blink 1s steps(1) infinite}
+.stats{display:flex;justify-content:center;gap:2.5rem;margin:1.8rem 0 2.2rem;color:var(--mute)}
+.stats b{display:block;font-size:2.2rem;color:var(--fg)}
+.cta{display:inline-block;padding:.95rem 1.9rem;border-radius:99px;color:#0a0a18;font-weight:600;text-decoration:none;background:linear-gradient(135deg,var(--a),var(--b));box-shadow:0 12px 40px -12px var(--a)}
+.cta:hover{scale:1.06}
+
+/* ── Recherche + rubriques ── */
+.tools{max-width:1100px;margin:2rem auto 0;padding:0 1.5rem}
+input{width:100%;padding:1rem 1.5rem;border-radius:99px;border:1px solid var(--line);background:var(--card);color:var(--fg);font:inherit;outline:none;backdrop-filter:blur(10px);transition:border-color .3s,box-shadow .3s}
+input:focus{border-color:var(--b);box-shadow:0 0 0 4px color-mix(in srgb,var(--b) 25%,transparent)}
+.sec{position:relative;max-width:1100px;margin:auto;padding:5rem 1.5rem 1rem}
+.num{position:absolute;right:1.5rem;top:2rem;font-size:clamp(6rem,20vw,13rem);font-weight:800;line-height:1;color:transparent;-webkit-text-stroke:1.5px color-mix(in srgb,var(--c) 45%,transparent);opacity:.55;pointer-events:none}
+.sec header{position:relative;margin-bottom:2rem}
+h2{font-size:clamp(1.8rem,5vw,3rem);font-weight:800}
+h2::after{content:"";display:block;width:0;height:4px;margin-top:.7rem;border-radius:4px;background:var(--c);transition:width 1s .4s}
+.in h2::after{width:90px}
+.sec header p{margin-top:.8rem;color:var(--mute);max-width:46ch}
+.grid{position:relative;display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1.2rem}
+
+/* ── Apparition au scroll ── */
+/* .rv.in doit remettre opacity:1, sinon l'animation « up » retombe sur opacity:0 : les cartes restent cliquables mais invisibles */
+.rv{opacity:0}
+.rv.in{opacity:1;animation:up .9s cubic-bezier(.2,.8,.2,1) both;animation-delay:calc(var(--i,0)*80ms)}
+
+/* ── Cartes (inclinaison 3D + halo qui suit la souris) ── */
+.card{--s:1;position:relative;display:flex;flex-direction:column;gap:.6rem;padding:1.5rem;border-radius:22px;overflow:hidden;color:inherit;text-decoration:none;background:var(--card);border:1px solid var(--line);backdrop-filter:blur(10px);transform:perspective(800px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg)) scale(var(--s));transition:transform .15s ease-out,border-color .3s,box-shadow .3s}
+.card::before{content:"";position:absolute;inset:0;opacity:0;transition:opacity .3s;background:radial-gradient(280px circle at var(--x,50%) var(--y,50%),color-mix(in srgb,var(--c) 38%,transparent),transparent 70%)}
+.card>*{position:relative}
+.card:hover{--s:1.03;border-color:var(--c);box-shadow:0 24px 50px -24px var(--c)}
+.card:hover::before{opacity:1}
+.ico{display:grid;place-items:center;width:3.4rem;height:3.4rem;font-size:1.8rem;border-radius:16px;background:color-mix(in srgb,var(--c) 22%,transparent);transition:transform .4s cubic-bezier(.3,1.7,.5,1)}
+.card:hover .ico{transform:rotate(-12deg) scale(1.18)}
+.card h3{font-size:1.25rem}
+.card p{flex:1;color:var(--mute);line-height:1.5;font-size:.95rem}
+.go{align-self:flex-start;margin-top:.4rem;padding:.5rem 1rem;border-radius:99px;font-weight:600;color:color-mix(in srgb,var(--c) 50%,var(--fg));border:1px solid color-mix(in srgb,var(--c) 55%,transparent);background:color-mix(in srgb,var(--c) 14%,transparent);transition:background .3s,color .3s}
+.card:hover .go{background:var(--c);color:#0a0a18}
+.go i{display:inline-block;font-style:normal;transition:transform .3s}
+.card:hover .go i{transform:translate(4px,-4px)}
+
+/* ── Effet de clic ── */
+.pop,.wave{position:fixed;z-index:98;pointer-events:none}
+.pop{font-weight:800;animation:pop .9s cubic-bezier(.1,.7,.3,1) forwards}
+.wave{width:20px;height:20px;margin:-10px;border:2px solid var(--col);border-radius:50%;animation:wave .7s ease-out forwards}
+
+#none,.none{padding:4rem 1rem;text-align:center;color:var(--mute)}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+footer{padding:5rem 1rem 3rem;text-align:center;color:var(--mute)}
+
+@keyframes hue{to{filter:hue-rotate(360deg)}}
+@keyframes blink{50%{opacity:0}}
+@keyframes drop{from{opacity:0;translate:0 .6em;rotate:10deg}}
+@keyframes up{from{opacity:0;translate:0 50px;scale:.95}}
+@keyframes pop{to{transform:translate(var(--dx),var(--dy)) rotate(var(--r)) scale(.3);opacity:0}}
+@keyframes wave{to{scale:8;opacity:0}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{animation-duration:.01ms!important;animation-delay:0s!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+</style>
+</head>
+<body>
+<div id="bar"></div><canvas id="bg"></canvas><div class="spot"></div>
+<div class="dot" id="dot"></div><div class="ring" id="ring"></div>
+
+<nav aria-label="Rubriques">
+  <a class="logo" href="#top" data-magnet>∑ Ismo</a>
+  <div class="chips" id="chips"></div><!-- généré automatiquement -->
+</nav>
+
+<header class="hero" id="top">
+  <i class="orb" style="--k:-90;width:420px;height:420px;left:8%;top:10%;background:var(--a)"></i>
+  <i class="orb" style="--k:70;width:360px;height:360px;right:6%;top:30%;background:var(--b)"></i>
+  <i class="orb" style="--k:-50;width:300px;height:300px;left:40%;bottom:0;background:var(--p)"></i>
+  <div class="hero-in">
+    <p class="eyebrow">Bienvenue dans mon univers</p>
+    <h1 id="title">Ismo</h1>
+    <p class="type">Explore · <b id="type"></b></p>
+    <div class="stats"><div><b id="nSites">0</b>sites</div><div><b id="nSec">0</b>rubriques</div></div>
+    <a class="cta" href="#explorer" data-magnet>Découvrir ↓</a>
+  </div>
+</header>
+
+<main id="explorer">
+  <div class="tools"><input id="q" type="search" placeholder="🔍  Rechercher un site, un chapitre…" aria-label="Rechercher"></div>
+  <div id="sites"></div><!-- généré automatiquement -->
+  <p id="none" hidden>Aucun résultat… essaie un autre mot 🙈</p>
+  <noscript><p class="none">Active JavaScript pour afficher les sites.</p></noscript>
+</main>
+
+<footer>Fait avec ♥ par Ismo · <span id="y"></span></footer>
+
+<script>
+"use strict";
+/* ═══════════════════════════════════════════════════════════════
+   ✏️  ZONE À MODIFIER : tout le contenu du site se gère ici
+   ═══════════════════════════════════════════════════════════════
+   ➜ Ajouter un SITE      : copie une ligne { icon, title, desc, url }
+                            dans la liste « sites » de la rubrique voulue.
+   ➜ Ajouter une RUBRIQUE : copie un bloc complet { id, label, icon, color,
+                            title, text, sites: [ … ] } dans SECTIONS.
+   Menu, cartes, compteurs, recherche et animations se mettent à jour
+   tout seuls. Les liens s’ouvrent toujours dans un nouvel onglet. */
+const SECTIONS = [
+  {
+    id: "cours", label: "Cours", icon: "📐", color: "#7c5cff",
+    title: "Maths · Cours & méthodes",
+    text: "Les bases, les formules et les démonstrations pour réviser efficacement.",
+    sites: [
+      { icon: "🧠", title: "Base Math",           desc: "Tout ce qu’il faut connaître en mathématiques.",  url: "https://ismooro.github.io/a-connaitre-en-math/" },
+      { icon: "📏", title: "Formulaire Trigo",    desc: "Toutes les formules de trigonométrie réunies.",   url: "https://ismooro.github.io/TRIGO/" },
+      { icon: "🔢", title: "Suite Numérique",     desc: "Cours et méthodes sur les suites numériques.",    url: "https://ismooro.github.io/Suites/" },
+      { icon: "🗂️", title: "Fiche méthode Math",  desc: "Les méthodes clés présentées en fiches claires.", url: "https://ismooro.github.io/Demonstration/" },
+      { icon: "📝", title: "Démonstrations Math", desc: "Démonstrations des chapitres 1, 2, 3 et 4.",      url: "https://ismooro.github.io/DefMathATS27/" },
+      { icon: "🧮", title: "Cahier de calcul",    desc: "S’entraîner au calcul au quotidien.",             url: "https://ismooro.github.io/Cahier-de-calcul/" },
+    ],
+  },
+  {
+    id: "td", label: "TD", icon: "✏️", color: "#00b8d9",
+    title: "Maths · TD corrigés",
+    text: "Les corrections détaillées des travaux dirigés.",
+    sites: [
+      { icon: "✅", title: "TD 1 & 2 Math", desc: "Correction des TD 1 et 2.", url: "https://ismooro.github.io/TD1et2/" },
+      { icon: "📘", title: "TD 3 & 4 Math", desc: "Correction des TD 3 et 4.", url: "https://ismooro.github.io/TD3TD4/#e3-1" },
+    ],
+  },
+  {
+    id: "sciences", label: "Sciences", icon: "⚛️", color: "#ff5ca8",
+    title: "Sciences",
+    text: "Physique et sciences de l’ingénieur.",
+    sites: [
+      { icon: "🎛️", title: "SLCI",           desc: "Systèmes linéaires continus et invariants.", url: "https://ismooro.github.io/everyday/" },
+      { icon: "⚡", title: "Physique Chp 1", desc: "Mesures et incertitudes, chapitre 1.",       url: "https://ismooro.github.io/PhyMesEtInc/" },
+    ],
+  },
+  {
+    id: "autres", label: "Langues & Portfolio", icon: "🌍", color: "#ffb020",
+    title: "Langues & Portfolio",
+    text: "L’anglais, et un coup d’œil sur mon parcours.",
+    sites: [
+      { icon: "🇬🇧", title: "Verbes irréguliers", desc: "La liste des verbes irréguliers en US et UK.", url: "https://ismooro.github.io/VerIrr/" },
+      { icon: "💼", title: "Portfolio de Ismo",   desc: "Mes projets et mon parcours.",                 url: "https://ismooro.github.io/Portfolio/" },
+    ],
+  },
+];
+/* ═══════════ FIN DE LA ZONE À MODIFIER ═══════════ */
+
+
+/* ── Outils ── */
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const rnd = n => Math.random() * n;
+const pick = a => a[Math.floor(rnd(a.length))];
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const norm = s => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+const countUp = (el, to) => { let t0; const f = t => { t0 ??= t; const k = Math.min((t - t0) / 1200, 1); el.textContent = Math.round(to * (1 - (1 - k) ** 3)); if (k < 1) requestAnimationFrame(f); }; requestAnimationFrame(f); };
+const GLYPHS = [..."∑π∫√∞Δθ≈±×÷∂λΩ"];
+const PALETTE = ["#7c5cff", "#00d4ff", "#ff5ca8", "#ffb020"];
+const root = document.documentElement;
+const fine = matchMedia("(pointer:fine)").matches;
+const calm = matchMedia("(prefers-reduced-motion:reduce)").matches;
+
+
+/* ── 1. Construction de la page à partir de SECTIONS ── */
+SECTIONS.forEach((s, n) => {
+  $("#chips").insertAdjacentHTML("beforeend",
+    `<a class="chip" href="#${esc(s.id)}" style="--c:${esc(s.color)}" data-magnet>${esc(s.icon)} ${esc(s.label || s.title)}</a>`);
+  $("#sites").insertAdjacentHTML("beforeend", `
+    <section class="sec" id="${esc(s.id)}" style="--c:${esc(s.color)}">
+      <span class="num" data-par=".1">${String(n + 1).padStart(2, "0")}</span>
+      <header class="rv"><h2>${esc(s.icon)} ${esc(s.title)}</h2><p>${esc(s.text)}</p></header>
+      <div class="grid">${s.sites.map((w, i) => `
+        <a class="card rv" style="--i:${i}" href="${esc(w.url)}" target="_blank" rel="noopener noreferrer"
+           data-s="${esc([w.title, w.desc, s.title].join(" "))}">
+          <span class="ico" aria-hidden="true">${esc(w.icon || "🔗")}</span>
+          <h3>${esc(w.title)}</h3><p>${esc(w.desc)}</p>
+          <span class="go">Ouvrir <i aria-hidden="true">↗</i><span class="sr"> (nouvel onglet)</span></span>
+        </a>`).join("")}
+      </div>
+    </section>`);
+});
+countUp($("#nSites"), SECTIONS.reduce((n, s) => n + s.sites.length, 0));
+countUp($("#nSec"), SECTIONS.length);
+$("#y").textContent = new Date().getFullYear();
+
+const h1 = $("#title"), name = h1.textContent;               // titre : une lettre = un <span> animé
+h1.setAttribute("aria-label", name);
+h1.innerHTML = [...name].map((c, i) => `<span aria-hidden="true" style="--i:${i}">${esc(c)}</span>`).join("");
+
+const words = SECTIONS.map(s => s.title); let wi = 0, ci = 0, del = false;   // machine à écrire
+(function type() {
+  const w = words[wi]; ci += del ? -1 : 1; $("#type").textContent = w.slice(0, ci);
+  let t = del ? 28 : 65;
+  if (!del && ci === w.length) { del = true; t = 1500; }
+  else if (del && !ci) { del = false; wi = (wi + 1) % words.length; t = 350; }
+  setTimeout(type, t);
+})();
+
+
+/* ── 2. Apparition au scroll + menu actif ── */
+const reveal = new IntersectionObserver(es => es.forEach(e => {
+  if (e.isIntersecting) { e.target.classList.add("in"); reveal.unobserve(e.target); }
+}), { threshold: .15 });
+$$(".rv").forEach(el => reveal.observe(el));
+
+const chips = $$(".chip");
+const spy = new IntersectionObserver(es => es.forEach(e => {
+  if (!e.isIntersecting) return;
+  chips.forEach(c => c.classList.toggle("on", c.hash === "#" + e.target.id));
+  const on = $(".chip.on"), strip = $("#chips");                 // garde la rubrique active visible dans le menu
+  if (on) {
+    const sr = strip.getBoundingClientRect(), cr = on.getBoundingClientRect();
+    strip.scrollTo({ left: strip.scrollLeft + cr.left - sr.left - (sr.width - cr.width) / 2, behavior: "smooth" });
+  }
+}), { rootMargin: "-45% 0px -50% 0px" });
+$$(".sec").forEach(s => spy.observe(s));
+
+
+/* ── 3. Recherche ── */
+$("#q").addEventListener("input", e => {
+  const q = norm(e.target.value);
+  $$(".card").forEach(c => c.hidden = !norm(c.dataset.s).includes(q));
+  $$(".sec").forEach(s => s.hidden = !$(".card:not([hidden])", s));
+  $("#none").hidden = !!$(".sec:not([hidden])");
+});
+
+
+/* ── 4. Souris : curseur, halo, inclinaison des cartes, aimants ── */
+const dot = $("#dot"), ring = $("#ring"), magnets = $$("[data-magnet]");
+let mx = innerWidth / 2, my = innerHeight / 3, rx = mx, ry = my;
+/* le curseur personnalisé n’apparaît qu’au premier mouvement de souris (jamais au tactile) */
+
+addEventListener("pointermove", e => {
+  mx = e.clientX; my = e.clientY;
+  if (fine && !calm && e.pointerType === "mouse" && !root.classList.contains("fx")) { root.classList.add("fx"); rx = mx; ry = my; }
+  const c = e.target.closest(".card");
+  if (c && fine) {                                              // inclinaison 3D + halo local
+    const r = c.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top;
+    c.style.setProperty("--x", x + "px"); c.style.setProperty("--y", y + "px");
+    c.style.setProperty("--rx", ((y / r.height - .5) * -12) + "deg");
+    c.style.setProperty("--ry", ((x / r.width - .5) * 12) + "deg");
+  }
+  magnets.forEach(el => {                                       // effet « aimant »
+    const r = el.getBoundingClientRect(), dx = mx - r.left - r.width / 2, dy = my - r.top - r.height / 2;
+    el.style.transform = fine && Math.hypot(dx, dy) < 90 ? `translate(${dx * .3}px,${dy * .3}px)` : "";
+  });
+});
+document.addEventListener("pointerout", e => {
+  const c = e.target.closest(".card");
+  if (c && !c.contains(e.relatedTarget)) { c.style.setProperty("--rx", "0deg"); c.style.setProperty("--ry", "0deg"); }
+});
+document.addEventListener("pointerover", e => {
+  ring.classList.toggle("big", !!e.target.closest("a,button,input"));
+  ring.dataset.t = e.target.closest(".card") ? "↗" : "";
+});
+
+
+/* ── 5. Clic : onde + explosion de symboles maths ── */
+function burst(x, y, col) {
+  const add = (el, ms) => { document.body.append(el); setTimeout(() => el.remove(), ms); };
+  const w = document.createElement("i");
+  w.className = "wave"; w.style.cssText = `left:${x}px;top:${y}px;--col:${col}`; add(w, 700);
+  for (let k = 0; k < 12; k++) {
+    const p = document.createElement("span"), a = (k / 12) * 6.283 + rnd(.5), d = 50 + rnd(80);
+    p.className = "pop"; p.textContent = pick(GLYPHS);
+    p.style.cssText = `left:${x}px;top:${y}px;color:${col};font-size:${12 + rnd(16)}px;--dx:${Math.cos(a) * d}px;--dy:${Math.sin(a) * d}px;--r:${rnd(360) - 180}deg`;
+    add(p, 900);
+  }
+}
+document.addEventListener("pointerdown", e => {
+  if (calm) return;
+  const s = e.target.closest(".sec,.chip");                     // la couleur suit la rubrique cliquée
+  burst(e.clientX, e.clientY, s ? getComputedStyle(s).getPropertyValue("--c").trim() : pick(PALETTE));
+});
+
+
+/* ── 6. Fond animé : symboles maths repoussés par la souris, entraînés par le scroll ── */
+const cv = $("#bg"), g = cv.getContext("2d");
+let W, H, dots = [], ink = "#fff";
+function resize() {
+  const d = devicePixelRatio || 1; W = innerWidth; H = innerHeight;
+  cv.width = W * d; cv.height = H * d; g.setTransform(d, 0, 0, d, 0, 0);
+  ink = getComputedStyle(root).getPropertyValue("--fg").trim();
+  dots = Array.from({ length: Math.min(55, W / 20 | 0) }, () => ({
+    x: rnd(W), y: rnd(H), vx: rnd(.4) - .2, vy: rnd(.4) - .2, z: .3 + rnd(.9), g: pick(GLYPHS),
+  }));
+}
+function draw(dv) {
+  g.clearRect(0, 0, W, H); g.fillStyle = ink; g.textAlign = "center";
+  for (const d of dots) {
+    const dx = d.x - mx, dy = d.y - my, dist = Math.hypot(dx, dy) || 1;
+    if (dist < 160) { const f = (160 - dist) / 160; d.x += dx / dist * f * 6; d.y += dy / dist * f * 6; }
+    d.x += d.vx; d.y += d.vy - dv * d.z * .6;
+    if (d.x < -30) d.x = W + 30; if (d.x > W + 30) d.x = -30;
+    if (d.y < -30) d.y = H + 30; if (d.y > H + 30) d.y = -30;
+    g.globalAlpha = .07 + d.z * .13; g.font = `${14 + d.z * 26 | 0}px Outfit,serif`; g.fillText(d.g, d.x, d.y);
+  }
+}
+addEventListener("resize", () => { resize(); if (calm) loop(); });
+resize();
+
+
+/* ── 7. Boucle d’animation : curseur, halo, parallaxe, barre de progression ── */
+const bar = $("#bar"), hero = $(".hero"), heroIn = $(".hero-in"), spot = $(".spot"), pars = $$("[data-par]");
+let sy = 0;
+function loop() {
+  rx += (mx - rx) * .16; ry += (my - ry) * .16;
+  dot.style.transform = `translate(${mx}px,${my}px) translate(-50%,-50%)`;
+  ring.style.transform = `translate(${rx}px,${ry}px) translate(-50%,-50%)`;
+  spot.style.setProperty("--mx", rx + "px"); spot.style.setProperty("--my", ry + "px");
+  hero.style.setProperty("--nx", (rx / W - .5) * 2); hero.style.setProperty("--ny", (ry / H - .5) * 2);
+
+  const y = scrollY, dv = Math.max(-60, Math.min(60, y - sy)); sy = y;
+  if (dv) {
+    bar.style.transform = `scaleX(${y / ((root.scrollHeight - innerHeight) || 1)})`;
+    heroIn.style.transform = `translateY(${y * .35}px) scale(${Math.max(.8, 1 - y / 2500)})`;
+    heroIn.style.opacity = Math.max(0, 1 - y / (H * .7));
+    pars.forEach(el => {                                         // parallaxe : mesure sur le parent (non transformé)
+      const r = el.parentElement.getBoundingClientRect();
+      el.style.transform = `translateY(${-(r.top + r.height / 2 - H / 2) * parseFloat(el.dataset.par)}px)`;
+    });
+  }
+  draw(dv);
+  if (!calm) requestAnimationFrame(loop);
+}
+loop();
+</script>
+</body>
+</html>
